@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản Lý Phòng Họp - Technology X</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --nav-bg:#ffffff;
+  --nav-border:#e5e7eb;
+  --sidebar-bg:#f3f4f6;
+  --cal-bg:#ffffff;
+  --cal-border:#e5e7eb;
+  --text:#111827;
+  --text-light:#6b7280;
+  --accent-nav:#3b5bdb;
+  --green-badge:#22c55e;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f3f4f6;min-height:100vh;display:flex;flex-direction:column;font-size:13px;}
+
+/* ─── TOP BAR (identical to index.html) ─── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:#fff;border-bottom:1px solid #e5e7eb;
+  padding:0 16px;height:60px;flex-shrink:0;
+  position:sticky;top:0;z-index:100;
+}
+.logo-wrap{display:flex;align-items:center;gap:8px;}
+.logo-box{
+  width:44px;height:44px;border-radius:10px;
+  background:linear-gradient(135deg,#6d28d9,#a78bfa);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:16px;color:#fff;letter-spacing:-1px;
+}
+.logo-name{font-size:11px;color:#6b7280;line-height:1.2;text-align:center;}
+.nav-links{
+  position:absolute;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;justify-content:center;gap:4px;
+}
+.nav-links a{
+  padding:8px 20px;border-radius:20px;font-size:13px;
+  color:#374151;text-decoration:none;cursor:pointer;
+  transition:all .15s;white-space:nowrap;font-weight:500;
+}
+.nav-links a:hover{background:#f3f4f6;}
+.nav-links a.active{background:#3b5bdb;color:#fff;}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.search-nav{
+  display:flex;align-items:center;gap:6px;
+  background:#f9fafb;border:1px solid #e5e7eb;
+  border-radius:20px;padding:6px 14px;
+}
+.search-nav input{border:none;background:none;outline:none;font-size:13px;color:#374151;width:120px;}
+.user-info{font-size:13px;color:#374151;font-weight:500;}
+.avatar{width:32px;height:32px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:12px;color:#6b7280;}
+
+/* ─── LAYOUT ─── */
+.app{display:flex;flex:1;height:calc(100vh - 60px);overflow:hidden;}
+
+/* ─── SIDEBAR (light grey, matching screenshot) ─── */
+.sidebar{
+  width:230px;min-width:230px;
+  background:#f0f0f0;
+  display:flex;flex-direction:column;
+  overflow-y:auto;
+  border-right:1px solid #e0e0e0;
+  padding:20px 0;
+}
+.sidebar-item{
+  display:flex;align-items:center;gap:10px;
+  padding:13px 24px;
+  font-size:13px;font-weight:600;color:#374151;
+  cursor:pointer;transition:background .15s;
+  border-radius:0;
+  text-decoration:none;
+}
+.sidebar-item:hover{background:#e5e5e5;}
+.sidebar-item.active{
+  background:#4c6ef5;color:#fff;
+  border-radius:30px;margin:0 14px;padding:13px 18px;
+}
+.sidebar-item svg{flex-shrink:0;}
+
+/* ─── MAIN CONTENT ─── */
+.main-content{flex:1;overflow-y:auto;padding:28px 32px;background:#f3f4f6;}
+
+/* ─── PAGE HEADER ─── */
+.page-header{margin-bottom:22px;}
+.page-title{font-size:22px;font-weight:700;color:#111827;}
+.page-title span{color:#4c6ef5;}
+
+/* ─── FILTER BAR ─── */
+.filter-bar{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:18px;flex-wrap:wrap;
+}
+.filter-search{
+  display:flex;align-items:center;gap:7px;
+  background:#fff;border:1px solid #e5e7eb;border-radius:8px;
+  padding:8px 14px;min-width:200px;
+}
+.filter-search input{border:none;background:none;outline:none;font-size:13px;color:#374151;width:160px;}
+.filter-select{
+  background:#fff;border:1px solid #e5e7eb;border-radius:8px;
+  padding:8px 14px;font-size:13px;color:#374151;
+  cursor:pointer;outline:none;appearance:none;
+  padding-right:28px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 10px center;
+}
+.btn-add{
+  margin-left:auto;
+  display:flex;align-items:center;gap:6px;
+  background:#22c55e;color:#fff;
+  border:none;border-radius:8px;
+  padding:9px 18px;font-size:13px;font-weight:600;
+  cursor:pointer;transition:background .15s;white-space:nowrap;
+}
+.btn-add:hover{background:#16a34a;}
+
+/* ─── TABLE ─── */
+.table-wrap{background:#fff;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:#fff;border-bottom:1px solid #e5e7eb;}
+thead th{
+  padding:12px 16px;text-align:left;
+  font-size:12px;font-weight:600;color:#6b7280;
+  white-space:nowrap;
+}
+tbody tr{border-bottom:1px solid #f3f4f6;transition:background .12s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#f9fafb;}
+tbody td{padding:13px 16px;font-size:13px;color:#111827;vertical-align:middle;}
+.td-name{font-weight:600;color:#111827;}
+.td-location{color:#6b7280;}
+
+/* ─── STATUS BADGES ─── */
+.badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;
+}
+.badge-green{background:#dcfce7;color:#15803d;}
+.badge-green::before{content:'●';color:#22c55e;font-size:8px;}
+.badge-orange{background:#fff7ed;color:#c2410c;}
+.badge-orange::before{content:'●';color:#f97316;font-size:8px;}
+.badge-yellow{background:#fef9c3;color:#854d0e;}
+.badge-yellow::before{content:'●';color:#eab308;font-size:8px;}
+
+/* ─── ACTION BUTTONS ─── */
+.actions{display:flex;align-items:center;gap:6px;}
+.btn-icon{
+  width:30px;height:30px;border-radius:6px;border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background .12s;background:transparent;
+}
+.btn-icon:hover{background:#f3f4f6;}
+.btn-icon.edit{color:#4c6ef5;}
+.btn-icon.del{color:#ef4444;}
+
+/* ─── PAGINATION ─── */
+.pagination{
+  display:flex;align-items:center;justify-content:center;
+  gap:4px;margin-top:20px;
+}
+.pg-btn{
+  width:32px;height:32px;border-radius:6px;border:1px solid #e5e7eb;
+  background:#fff;color:#374151;font-size:13px;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .12s;
+}
+.pg-btn:hover{background:#f3f4f6;}
+.pg-btn.active{background:#4c6ef5;color:#fff;border-color:#4c6ef5;}
+.pg-btn.arrow{color:#9ca3af;}
+
+/* ─── MODAL OVERLAY ─── */
+.modal-ov{
+  position:fixed;inset:0;background:rgba(0,0,0,.35);
+  z-index:500;display:none;align-items:flex-start;justify-content:flex-end;
+}
+.modal-ov.open{display:flex;}
+
+.modal-panel{
+  background:#fff;
+  width:500px;max-width:100vw;
+  height:100vh;
+  overflow-y:auto;
+  box-shadow:-8px 0 40px rgba(0,0,0,.15);
+  display:flex;flex-direction:column;
+  animation:slideIn .25s ease;
+}
+@keyframes slideIn{from{transform:translateX(100%);}to{transform:translateX(0);}}
+
+.modal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 24px;border-bottom:1px solid #e5e7eb;
+}
+.modal-title{font-size:15px;font-weight:700;color:#111827;letter-spacing:.03em;text-transform:uppercase;}
+.modal-close{
+  width:28px;height:28px;border-radius:50%;border:none;
+  background:none;cursor:pointer;font-size:18px;color:#ef4444;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .12s;
+}
+.modal-close:hover{background:#fee2e2;}
+
+.modal-body{padding:24px;flex:1;display:flex;flex-direction:column;gap:20px;}
+
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-label{font-size:13px;font-weight:600;color:#374151;}
+.form-input{
+  width:100%;padding:10px 14px;font-size:13px;
+  border:1px solid #e5e7eb;border-radius:8px;
+  background:#f9fafb;color:#111827;outline:none;
+  transition:border-color .15s,background .15s;
+}
+.form-input:focus{border-color:#4c6ef5;background:#fff;}
+.form-input::placeholder{color:#9ca3af;}
+.form-select{
+  width:100%;padding:10px 14px;font-size:13px;
+  border:1px solid #e5e7eb;border-radius:8px;
+  background:#f9fafb;color:#111827;outline:none;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+  cursor:pointer;transition:border-color .15s;
+}
+.form-select:focus{border-color:#4c6ef5;}
+
+.error-msg{
+  display:flex;align-items:center;gap:5px;
+  font-size:12px;color:#ef4444;font-weight:500;
+}
+.error-msg::before{content:'⊘';}
+
+.modal-footer{
+  padding:16px 24px;border-top:1px solid #e5e7eb;
+  display:flex;justify-content:flex-end;
+}
+.btn-save{
+  display:flex;align-items:center;gap:7px;
+  background:#4c6ef5;color:#fff;border:none;
+  border-radius:8px;padding:10px 24px;
+  font-size:14px;font-weight:600;cursor:pointer;
+  transition:background .15s;
+}
+.btn-save:hover{background:#3b5bdb;}
+
+/* ─── DELETE CONFIRM MODAL ─── */
+.confirm-ov{
+  position:fixed;inset:0;background:rgba(0,0,0,.4);
+  z-index:600;display:none;align-items:center;justify-content:center;
+}
+.confirm-ov.open{display:flex;}
+.confirm-box{
+  background:#fff;border-radius:12px;padding:28px 24px;
+  width:360px;max-width:95vw;
+  box-shadow:0 20px 60px rgba(0,0,0,.2);
+  text-align:center;
+}
+.confirm-icon{font-size:36px;margin-bottom:12px;}
+.confirm-title{font-size:16px;font-weight:700;color:#111827;margin-bottom:6px;}
+.confirm-sub{font-size:13px;color:#6b7280;margin-bottom:22px;}
+.confirm-actions{display:flex;gap:10px;justify-content:center;}
+.btn-cancel-conf{
+  padding:9px 22px;border-radius:8px;border:1px solid #e5e7eb;
+  background:#fff;color:#374151;font-size:13px;font-weight:600;
+  cursor:pointer;transition:background .12s;
+}
+.btn-cancel-conf:hover{background:#f3f4f6;}
+.btn-del-conf{
+  padding:9px 22px;border-radius:8px;border:none;
+  background:#ef4444;color:#fff;font-size:13px;font-weight:600;
+  cursor:pointer;transition:background .12s;
+}
+.btn-del-conf:hover{background:#dc2626;}
+
+/* ─── TOAST ─── */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 18px;border-radius:10px;
+  font-size:13px;font-weight:600;
+  box-shadow:0 8px 32px rgba(0,0,0,.18);
+  animation:toastIn .3s ease;min-width:220px;pointer-events:auto;
+}
+.toast.success{background:#22c55e;color:#fff;}
+.toast.error{background:#ef4444;color:#fff;}
+.toast.warn{background:#f59e0b;color:#fff;}
+.toast-icon{font-size:18px;width:28px;height:28px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;}
+@keyframes toastIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#e5e7eb;border-radius:3px;}
+
+/* ─── EMPTY STATE ─── */
+.empty-row td{text-align:center;padding:40px;color:#9ca3af;font-size:13px;}
+</style>
+</head>
+<body data-require-admin>
+<script src="/auth-guard.js"></script>
+
+<!-- TOP BAR -->
+<nav class="topbar">
+  <div class="logo-wrap">
+    <div class="logo-box">TX</div>
+    <div class="logo-name">Technology X</div>
+  </div>
+  <div class="nav-links">
+    <a href="#">Trang Chủ</a>
+    <a href="#">Nhân sự</a>
+    <a href="#">Dự án</a>
+    <a href="/">Đặt phòng họp</a>
+    <a class="active" href="#">Quản Lý</a>
+  </div>
+  <div class="nav-right">
+    <div class="search-nav">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input placeholder="Tìm kiếm">
+    </div>
+    <span class="user-info">Minh Lê · Admin</span>
+    <div class="avatar">ML</div>
+  </div>
+</nav>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a class="sidebar-item" href="#">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="sidebar-item" href="#">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Tài khoản
+    </a>
+    <a class="sidebar-item" href="#">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Công việc
+    </a>
+    <a class="sidebar-item active" href="/quan-ly-phong-hop.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Quản lý phòng họp
+    </a>
+    <a class="sidebar-item" href="/quan-ly-dat-phong.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Quản lý đặt phòng
+    </a>
+    <a class="sidebar-item" href="#">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Nhân sự
+    </a>
+    <a class="sidebar-item" href="#">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Cài đặt
+    </a>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Danh sách <span>phòng họp</span></h1>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <div class="filter-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input id="searchInput" placeholder="Tìm tên phòng..." oninput="applyFilters()">
+      </div>
+      <select class="filter-select" id="filterFloor" onchange="applyFilters()">
+        <option value="">Chọn tầng</option>
+        <option value="Tầng 17">Tầng 17</option>
+        <option value="Tầng 18">Tầng 18</option>
+        <option value="Tầng 19">Tầng 19</option>
+      </select>
+      <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+        <option value="">Trạng thái</option>
+        <option value="Sẵn sàng">Sẵn sàng</option>
+        <option value="Đang sửa">Đang sửa</option>
+        <option value="Đang hoạt động">Đang hoạt động</option>
+      </select>
+      <button class="btn-add" onclick="openAddModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Thêm phòng mới
+      </button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tên Phòng</th>
+            <th>Vị Trí</th>
+            <th>Sức chứa</th>
+            <th>Thiết bị</th>
+            <th>Trạng Thái</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody id="roomTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<!-- ADD / EDIT MODAL (slide-in panel) -->
+<div class="modal-ov" id="modalOv" onclick="handleOverlayClick(event)">
+  <div class="modal-panel" id="modalPanel">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitleText">THÊM PHÒNG MỚI</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Tên Phòng:</label>
+        <input class="form-input" id="fName" placeholder="Nhập tên phòng..." oninput="clearErr()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sức chứa:</label>
+        <input class="form-input" id="fCapacity" type="number" min="1" placeholder="Nhập sức chứa..." oninput="clearErr()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Vị Trí:</label>
+        <input class="form-input" id="fLocation" placeholder="Nhập vị trí..." oninput="clearErr()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Thiết bị:</label>
+        <select class="form-select" id="fEquipment">
+          <option value="">--- Chọn thiết bị ---</option>
+          <option value="Máy chiếu">Máy chiếu</option>
+          <option value="Tivi">Tivi</option>
+          <option value="Máy chiếu, Micro">Máy chiếu, Micro</option>
+          <option value="Máy chiếu, Tivi">Máy chiếu, Tivi</option>
+          <option value="Máy chiếu, Tivi, Micro">Máy chiếu, Tivi, Micro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Trạng Thái:</label>
+        <select class="form-select" id="fStatus">
+          <option value="">--- Chọn trạng thái---</option>
+          <option value="Sẵn sàng">Sẵn sàng</option>
+          <option value="Đang sửa">Đang sửa</option>
+          <option value="Đang hoạt động">Đang hoạt động</option>
+        </select>
+      </div>
+      <div class="error-msg" id="formError" style="display:none">Các trường trên bắt buộc phải nhập</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-save" onclick="saveRoom()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        LƯU
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="confirm-ov" id="confirmOv">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">Xác nhận xoá phòng</div>
+    <div class="confirm-sub" id="confirmSub">Bạn có chắc muốn xoá phòng này? Thao tác không thể hoàn tác.</div>
+    <div class="confirm-actions">
+      <button class="btn-cancel-conf" onclick="closeConfirm()">Huỷ bỏ</button>
+      <button class="btn-del-conf" onclick="doDelete()">Xoá phòng</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+// ═══ DATA ═══
+let rooms = [];
+let editingId = null;
+let deleteTargetId = null;
+
+// Pagination
+const PAGE_SIZE = 6;
+let currentPage = 1;
+let filteredRooms = [...rooms];
+const API_ROOMS = '/api/rooms';
+
+function escapeHtml(value){
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function jsString(value){
+  return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+async function readJson(res){
+  const data = await res.json().catch(() => ({}));
+  if(!res.ok) throw new Error(data.error || 'Có lỗi xảy ra');
+  return data;
+}
+
+async function loadRooms(){
+  try{
+    const res = await fetch(API_ROOMS);
+    rooms = await readJson(res);
+    applyFilters();
+  }catch(err){
+    rooms = [];
+    filteredRooms = [];
+    renderTable();
+    toast(err.message || 'Không thể tải danh sách phòng họp', 'error');
+  }
+}
+
+// ═══ RENDER TABLE ═══
+function renderTable(){
+  const tbody = document.getElementById('roomTableBody');
+  tbody.innerHTML = '';
+
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageRooms = filteredRooms.slice(start, start + PAGE_SIZE);
+
+  if(pageRooms.length === 0){
+    const tr = document.createElement('tr');
+    tr.className = 'empty-row';
+    tr.innerHTML = '<td colspan="6">Không tìm thấy phòng họp nào phù hợp</td>';
+    tbody.appendChild(tr);
+    renderPagination();
+    return;
+  }
+
+  pageRooms.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="td-name">${escapeHtml(r.name)}</td>
+      <td class="td-location">${escapeHtml(r.location)}</td>
+      <td>${escapeHtml(r.capacity)}</td>
+      <td>${escapeHtml(r.equipment || '—')}</td>
+      <td>${badgeHtml(r.status)}</td>
+      <td>
+        <div class="actions">
+          <button class="btn-icon edit" onclick="openEditModal('${jsString(r.id)}')" title="Chỉnh sửa">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-icon del" onclick="confirmDelete('${jsString(r.id)}')" title="Xoá">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+  renderPagination();
+}
+
+function badgeHtml(status){
+  if(status === 'Sẵn sàng')        return `<span class="badge badge-green">Sẵn sàng</span>`;
+  if(status === 'Đang hoạt động')  return `<span class="badge badge-orange">Đang hoạt động</span>`;
+  if(status === 'Đang sửa')        return `<span class="badge badge-yellow">Đang sửa</span>`;
+  return `<span class="badge">${escapeHtml(status)}</span>`;
+}
+
+// ═══ PAGINATION ═══
+function renderPagination(){
+  const total = Math.ceil(filteredRooms.length / PAGE_SIZE);
+  const pg = document.getElementById('pagination');
+  pg.innerHTML = '';
+  if(currentPage > total && total > 0) currentPage = total;
+
+  if(total <= 1){ pg.style.display='none'; return; }
+  pg.style.display='flex';
+
+  const prevBtn = mkPgBtn('‹', 'arrow');
+  prevBtn.onclick = () => { if(currentPage > 1){ currentPage--; renderTable(); } };
+  pg.appendChild(prevBtn);
+
+  for(let i = 1; i <= total; i++){
+    const btn = mkPgBtn(i, i === currentPage ? 'active' : '');
+    btn.onclick = () => { currentPage = i; renderTable(); };
+    pg.appendChild(btn);
+  }
+
+  const nextBtn = mkPgBtn('›', 'arrow');
+  nextBtn.onclick = () => { if(currentPage < total){ currentPage++; renderTable(); } };
+  pg.appendChild(nextBtn);
+
+  const lastBtn = mkPgBtn('»', 'arrow');
+  lastBtn.onclick = () => { currentPage = total; renderTable(); };
+  pg.appendChild(lastBtn);
+}
+
+function mkPgBtn(label, cls){
+  const btn = document.createElement('button');
+  btn.className = 'pg-btn ' + cls;
+  btn.textContent = label;
+  return btn;
+}
+
+// ═══ FILTERS ═══
+function applyFilters(){
+  const kw    = document.getElementById('searchInput').value.trim().toLowerCase();
+  const floor = document.getElementById('filterFloor').value;
+  const status= document.getElementById('filterStatus').value;
+
+  filteredRooms = rooms.filter(r => {
+    const matchKw    = !kw    || r.name.toLowerCase().includes(kw) || r.location.toLowerCase().includes(kw);
+    const matchFloor = !floor || r.location.includes(floor);
+    const matchSt    = !status|| r.status === status;
+    return matchKw && matchFloor && matchSt;
+  });
+  currentPage = 1;
+  renderTable();
+}
+
+// ═══ MODAL ═══
+function openAddModal(){
+  editingId = null;
+  document.getElementById('modalTitleText').textContent = 'THÊM PHÒNG MỚI';
+  document.getElementById('fName').value = '';
+  document.getElementById('fCapacity').value = '';
+  document.getElementById('fLocation').value = '';
+  document.getElementById('fEquipment').value = '';
+  document.getElementById('fStatus').value = '';
+  clearErr();
+  document.getElementById('modalOv').classList.add('open');
+}
+
+function openEditModal(id){
+  const r = rooms.find(x => x.id === id);
+  if(!r) return;
+  editingId = id;
+  document.getElementById('modalTitleText').textContent = 'CHỈNH SỬA PHÒNG';
+  document.getElementById('fName').value      = r.name;
+  document.getElementById('fCapacity').value  = r.capacity;
+  document.getElementById('fLocation').value  = r.location;
+  document.getElementById('fEquipment').value = r.equipment || '';
+  document.getElementById('fStatus').value    = r.status;
+  clearErr();
+  document.getElementById('modalOv').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('modalOv').classList.remove('open');
+}
+
+function handleOverlayClick(e){
+  if(e.target === document.getElementById('modalOv')) closeModal();
+}
+
+function clearErr(){
+  document.getElementById('formError').style.display = 'none';
+}
+
+async function saveRoom(){
+  const name     = document.getElementById('fName').value.trim();
+  const capacity = document.getElementById('fCapacity').value.trim();
+  const location = document.getElementById('fLocation').value.trim();
+  const equipment= document.getElementById('fEquipment').value;
+  const status   = document.getElementById('fStatus').value;
+
+  if(!name || !capacity || !location || !equipment || !status){
+    document.getElementById('formError').style.display = 'flex';
+    return;
+  }
+
+  try{
+    const payload = { name, capacity:+capacity, location, equipment, status };
+    const url = editingId ? `${API_ROOMS}/${encodeURIComponent(editingId)}` : API_ROOMS;
+    const method = editingId ? 'PUT' : 'POST';
+    await readJson(await fetch(url, {
+      method,
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    }));
+
+    const wasEditing = Boolean(editingId);
+    closeModal();
+    editingId = null;
+    await loadRooms();
+    toast((wasEditing ? 'Cập nhật phòng ' : 'Thêm phòng ') + name + ' thành công ✓', 'success');
+  }catch(err){
+    toast(err.message || 'Không thể lưu phòng họp', 'error');
+  }
+}
+
+// ═══ DELETE ═══
+function confirmDelete(id){
+  deleteTargetId = id;
+  const r = rooms.find(x => x.id === id);
+  document.getElementById('confirmSub').textContent = `Bạn có chắc muốn xoá phòng ${r ? r.name : ''}? Thao tác không thể hoàn tác.`;
+  document.getElementById('confirmOv').classList.add('open');
+}
+
+function closeConfirm(){
+  document.getElementById('confirmOv').classList.remove('open');
+  deleteTargetId = null;
+}
+
+async function doDelete(){
+  const r = rooms.find(x => x.id === deleteTargetId);
+  try{
+    await readJson(await fetch(`${API_ROOMS}/${encodeURIComponent(deleteTargetId)}`, {method:'DELETE'}));
+    closeConfirm();
+    await loadRooms();
+    toast('Đã xoá phòng ' + (r ? r.name : '') + ' ✓', 'warn');
+  }catch(err){
+    toast(err.message || 'Không thể xoá phòng họp', 'error');
+  }
+}
+
+// ═══ TOAST ═══
+function toast(msg, type='success'){
+  const w = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  const icon = type === 'success' ? '✓' : type === 'error' ? '✗' : '⚠';
+  el.innerHTML = `<div class="toast-icon">${icon}</div><div>${msg}</div>`;
+  w.appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = '0'; el.style.transition = 'opacity .3s';
+    setTimeout(() => el.remove(), 300);
+  }, 3000);
+}
+
+// ═══ INIT ═══
+loadRooms();
+</script>
+</body>
+</html>

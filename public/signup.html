@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng ký - Technology X</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif;}
+html,body{min-height:100vh;}
+body{
+  position:relative;min-height:100vh;
+  background:
+    linear-gradient(135deg, rgba(190,225,232,.55), rgba(210,235,238,.75)),
+    repeating-linear-gradient(90deg, #cfe7ec 0 60px, #bfe0e6 60px 62px),
+    repeating-linear-gradient(0deg, transparent 0 90px, rgba(255,255,255,.25) 90px 92px),
+    #d7ecef;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  padding:30px 0;
+}
+.deco-clock{
+  position:absolute;top:60px;right:60px;width:160px;height:160px;border-radius:50%;
+  border:6px solid rgba(255,255,255,.55);background:rgba(255,255,255,.25);
+  display:flex;align-items:center;justify-content:center;
+}
+.deco-clock::after{
+  content:'';width:2px;height:55px;background:#9cc7cd;position:absolute;top:24px;
+  transform-origin:bottom center;transform:rotate(35deg);
+}
+.deco-clock::before{
+  content:'';width:2px;height:35px;background:#9cc7cd;position:absolute;top:44px;
+  transform-origin:bottom center;transform:rotate(-50deg);
+}
+
+.brand{position:absolute;top:28px;left:40px;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.logo-box{
+  width:54px;height:54px;border-radius:14px;
+  background:linear-gradient(135deg,#1f2640,#6d28d9 60%,#ec4899);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:20px;color:#fff;letter-spacing:-1px;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+}
+.brand-name{font-size:11px;color:#475569;font-style:italic;}
+
+.card{
+  position:relative;z-index:2;width:400px;
+  background:rgba(184,219,201,.55);
+  backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.4);
+  border-radius:16px;
+  padding:34px 34px 28px;
+  box-shadow:0 18px 40px rgba(20,60,50,.18);
+}
+.card h1{font-size:24px;font-weight:800;color:#16241f;margin-bottom:20px;}
+
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:13px;font-weight:600;color:#1f2d27;margin-bottom:6px;}
+.field input, .field select{
+  width:100%;padding:9px 12px;font-size:13px;
+  background:rgba(255,255,255,.55);
+  border:1px solid rgba(40,60,50,.25);border-radius:8px;outline:none;color:#1f2d27;
+  transition:border-color .15s, background .15s;
+  appearance:none;-webkit-appearance:none;
+}
+.field select{cursor:pointer;}
+.field input::placeholder{color:#5b6e64;}
+.field input:focus, .field select:focus{border-color:#1f3d2e;background:rgba(255,255,255,.8);}
+
+.terms{display:flex;align-items:flex-start;gap:7px;font-size:12px;color:#1f2d27;margin:6px 0 16px;}
+.terms input{width:14px;height:14px;margin-top:1px;cursor:pointer;flex-shrink:0;}
+.terms a{color:#2952d6;text-decoration:underline;}
+
+.err-box{
+  background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;
+  font-size:12px;padding:8px 10px;border-radius:6px;margin-bottom:14px;display:none;
+}
+
+.btn-submit{
+  width:100%;padding:11px;border-radius:8px;border:none;
+  background:#33502f;color:#fff;font-weight:700;font-size:14px;
+  cursor:pointer;transition:background .15s;
+}
+.btn-submit:hover{background:#3e6038;}
+
+.divider{display:flex;align-items:center;gap:10px;margin:18px 0;font-size:12px;color:#1f2d27;}
+.divider span{flex:1;height:1px;background:rgba(31,45,39,.25);}
+
+.btn-google{
+  width:100%;padding:10px;border-radius:8px;
+  background:rgba(255,255,255,.7);border:1px solid rgba(40,60,50,.25);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:13px;font-weight:600;color:#1f2d27;cursor:not-allowed;opacity:.85;
+}
+
+.switch-line{text-align:center;font-size:13px;color:#1f2d27;margin-top:18px;}
+.switch-line a{color:#2952d6;font-weight:600;text-decoration:none;}
+.switch-line a:hover{text-decoration:underline;}
+
+.hint{font-size:11px;color:#33502f;text-align:center;margin-top:12px;opacity:.85;}
+</style>
+</head>
+<body>
+
+<div class="deco-clock"></div>
+<div class="brand">
+  <div class="logo-box">TX</div>
+  <div class="brand-name">Technology X</div>
+</div>
+
+<div class="card">
+  <h1>TechX Xin Chào!</h1>
+
+  <div class="err-box" id="errBox"></div>
+
+  <div class="field">
+    <label>Họ &amp; tên</label>
+    <input type="text" id="regFullName" placeholder="Nhập Họ &amp; tên">
+  </div>
+  <div class="field">
+    <label>Địa chỉ</label>
+    <input type="text" id="regAddress" placeholder="Nhập địa chỉ">
+  </div>
+  <div class="field">
+    <label>Giới Tính</label>
+    <select id="regGender">
+      <option value="">--- Chọn giới tính ---</option>
+      <option value="Nam">Nam</option>
+      <option value="Nữ">Nữ</option>
+      <option value="Khác">Khác</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Email</label>
+    <input type="email" id="regEmail" placeholder="Nhập email">
+  </div>
+  <div class="field">
+    <label>Mật Khẩu</label>
+    <input type="password" id="regPassword" placeholder="Nhập mật khẩu">
+  </div>
+
+  <label class="terms">
+    <input type="checkbox" id="agreeTerms">
+    <span>Tôi đồng ý với các <a href="javascript:void(0)">Điều khoản</a> của công ty</span>
+  </label>
+
+  <button class="btn-submit" onclick="doRegister()">Đăng Ký</button>
+
+  <div class="divider"><span></span>hoặc<span></span></div>
+
+  <button class="btn-google" type="button" title="Chức năng đang phát triển">
+    <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20.5H24v7h11.3C33.7 31.6 29.3 35 24 35c-6.1 0-11-4.9-11-11s4.9-11 11-11c2.8 0 5.3 1 7.3 2.7l5-5C32.7 7.7 28.6 6 24 6 13.5 6 5 14.5 5 25s8.5 19 19 19 19-8.5 19-19c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l5.7 4.2C13.5 15.7 18.4 12 24 12c2.8 0 5.3 1 7.3 2.7l5-5C32.7 7.7 28.6 6 24 6c-7.5 0-13.9 4.3-17.7 8.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.7 13.5-4.6l-6.2-5.3C29.3 35.6 26.8 36.5 24 36.5c-5.3 0-9.7-3.4-11.3-8.1l-5.8 4.4C10.1 39.5 16.5 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20.5H24v7h11.3c-.8 2.3-2.3 4.3-4.1 5.7l6.2 5.3C40.9 36 44 31 44 25c0-1.2-.1-2.4-.4-3.5z"/></svg>
+    Đăng nhập Google
+  </button>
+
+  <div class="switch-line">Bạn đã có tài khoản? <a href="/login.html">Đăng nhập</a></div>
+  <div class="hint">Tài khoản mới sẽ có vai trò User.</div>
+</div>
+
+<script>
+function showErr(msg){
+  const b=document.getElementById('errBox');
+  b.textContent=msg; b.style.display='block';
+}
+function hideErr(){ document.getElementById('errBox').style.display='none'; }
+
+function saveSession(data){
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('user', JSON.stringify(data.user));
+}
+
+async function doRegister(){
+  hideErr();
+  const fullName=document.getElementById('regFullName').value.trim();
+  const address=document.getElementById('regAddress').value.trim();
+  const gender=document.getElementById('regGender').value;
+  const email=document.getElementById('regEmail').value.trim();
+  const password=document.getElementById('regPassword').value;
+  const agreed=document.getElementById('agreeTerms').checked;
+
+  if(!fullName || !address || !gender || !email || !password){
+    showErr('Vui lòng nhập đầy đủ tất cả các thông tin');
+    return;
+  }
+  if(!agreed){
+    showErr('Vui lòng đồng ý với Điều khoản của công ty');
+    return;
+  }
+
+  try{
+    const res=await fetch('/api/auth/register',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({fullName,address,gender,email,password})
+    });
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error||'Đăng ký thất bại');
+    saveSession(data);
+    window.location.href='/';
+  }catch(err){ showErr(err.message); }
+}
+
+if(localStorage.getItem('token') || sessionStorage.getItem('token')){
+  window.location.href='/';
+}
+</script>
+</body>
+</html>

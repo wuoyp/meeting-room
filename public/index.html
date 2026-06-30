@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đặt Lịch Họp - Technology X</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --nav-bg:#ffffff;
+  --nav-border:#e5e7eb;
+  --sidebar-bg:#1a1d2e;
+  --sidebar-border:#2e3352;
+  --cal-bg:#ffffff;
+  --cal-border:#e5e7eb;
+  --cal-header:#f9fafb;
+  --time-col:#6b7280;
+  --text:#111827;
+  --text-light:#6b7280;
+  --accent:#ef4444;
+  --accent-nav:#3b5bdb;
+  --green-badge:#22c55e;
+  --input-bg:#2e3352;
+  --input-border:#3d4470;
+  --btn-cancel-bg:#374151;
+  --btn-confirm-bg:#374151;
+  --form-label:#9ca3af;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f3f4f6;min-height:100vh;display:flex;flex-direction:column;font-size:13px;}
+
+/* ─── TOP BAR ─── */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between; /* Căn hai đầu */
+  background:#fff;border-bottom:1px solid #e5e7eb;
+  padding:0 16px;height:60px;flex-shrink:0;
+  position:sticky;top:0;z-index:100;
+}
+.logo-wrap{display:flex;align-items:center;gap:8px;}
+.logo-box{
+  width:44px;height:44px;border-radius:10px;
+  background:linear-gradient(135deg,#6d28d9,#a78bfa);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:16px;color:#fff;letter-spacing:-1px;
+}
+.logo-name{font-size:11px;color:#6b7280;line-height:1.2;text-align:center;}
+
+/* Menu Căn giữa tuyệt đối */
+.nav-links{
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display:flex;align-items:center;justify-content:center;gap:4px;
+}
+.nav-links a{
+  padding:8px 20px;border-radius:20px;font-size:13px;
+  color:#374151;text-decoration:none;cursor:pointer;
+  transition:all .15s;white-space:nowrap;font-weight:500;
+}
+.nav-links a:hover{background:#f3f4f6;}
+.nav-links a.active{background:#3b5bdb;color:#fff;}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.search-nav{
+  display:flex;align-items:center;gap:6px;
+  background:#f9fafb;border:1px solid #e5e7eb;
+  border-radius:20px;padding:6px 14px;
+}
+.search-nav input{border:none;background:none;outline:none;font-size:13px;color:#374151;width:120px;}
+.search-nav svg{color:#9ca3af;}
+.user-info{font-size:13px;color:#374151;font-weight:500;}
+.avatar{width:32px;height:32px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:12px;color:#6b7280;}
+
+/* ─── LAYOUT ─── */
+.app{display:flex;flex:1;height:calc(100vh - 60px);overflow:hidden;}
+
+/* ─── SIDEBAR ─── */
+.sidebar{
+  width:270px;min-width:270px;
+  background:#1a1d2e;
+  display:flex;flex-direction:column;
+  overflow-y:auto;border-right:2px solid #0f1117;
+}
+
+.win-dots{display:flex;gap:6px;padding:14px 14px 8px;align-items:center;}
+.dot{width:12px;height:12px;border-radius:50%;}
+.dot.red{background:#ef4444;}.dot.yellow{background:#f59e0b;}.dot.green{background:#22c55e;}
+.dot-plus{margin-left:auto;width:22px;height:22px;border-radius:6px;background:#2e3352;border:none;color:#9ca3af;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+
+.mini-cal{padding:4px 14px 10px;}
+.mini-cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.mini-cal-title{font-size:18px;font-weight:700;color:#fff;}
+.mini-cal-title span{color:#ef4444;}
+.mini-nav-wrap{display:flex;gap:2px;}
+.mini-nav{background:none;border:none;color:#9ca3af;cursor:pointer;font-size:18px;padding:2px 5px;border-radius:4px;line-height:1;}
+.mini-nav:hover{background:#2e3352;color:#fff;}
+
+.cal-grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;}
+.dlabel{text-align:center;font-size:10px;color:#6b7280;padding:3px 0;font-weight:600;}
+.cday{
+  text-align:center;font-size:11px;padding:0;
+  border-radius:50%;cursor:pointer;color:#9ca3af;
+  transition:all .12s;position:relative;
+  width:28px;height:28px;margin:1px auto;
+  display:flex;align-items:center;justify-content:center;
+}
+.cday:hover{background:#2e3352;color:#fff;}
+.cday.today{color:#a78bfa;font-weight:700;}
+.cday.selected{background:#3b5bdb;color:#fff;font-weight:700;}
+.cday.other{color:#374151;}
+.cday.has-ev::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:#60a5fa;}
+.cday.has-ev2::after{background:#f472b6;}
+.cday.has-ev3::after{background:#34d399;}
+
+.event-dots{display:flex;gap:2px;justify-content:center;margin-top:1px;}
+.event-dot{width:4px;height:4px;border-radius:50%;}
+
+.today-info{padding:6px 14px 4px;display:flex;align-items:center;gap:6px;}
+.today-label-txt{font-size:11px;color:#6b7280;}
+.today-date-txt{font-size:11px;color:#60a5fa;font-weight:600;}
+
+.booking-form{padding:6px 10px 12px;}
+.form-badge{
+  display:inline-block;padding:5px 14px;border-radius:6px;
+  background:#22c55e;font-size:12px;font-weight:700;
+  color:#fff;margin-bottom:10px;cursor:default;
+}
+.form-section-label{font-size:10px;font-weight:700;color:#9ca3af;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;margin-top:8px;}
+.form-inp{
+  width:100%;padding:8px 10px;font-size:12px;
+  background:#2e3352;border:1px solid #3d4470;
+  border-radius:6px;color:#e2e8f0;outline:none;
+  transition:border-color .15s;
+}
+.form-inp:focus{border-color:#60a5fa;}
+.form-inp::placeholder{color:#4b5563;}
+
+.room-select-wrap{position:relative;}
+.room-select-btn{
+  width:100%;padding:8px 10px;font-size:12px;
+  background:#2e3352;border:1px solid #3d4470;
+  border-radius:6px;color:#e2e8f0;outline:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+  transition:border-color .15s;
+}
+.room-select-btn:hover{border-color:#60a5fa;}
+.room-list{display:flex;flex-direction:column;gap:3px;margin-top:6px;max-height:155px;overflow-y:auto;}
+.room-item{
+  padding:7px 10px;border-radius:6px;cursor:pointer;
+  background:#232640;border:1px solid transparent;
+  transition:all .12s;
+}
+.room-item:hover{border-color:#60a5fa;background:#2e3352;}
+.room-item.selected-room{border-color:#3b5bdb;background:#1e2d6b;}
+.room-item.busy{cursor:not-allowed;opacity:.55;border-color:#ef4444 !important;background:#2d1515;}
+.room-item-name{font-size:12px;font-weight:600;color:#e2e8f0;}
+.room-item-detail{font-size:10px;color:#6b7280;margin-top:1px;}
+.room-status-dot{font-size:10px;font-weight:700;margin-top:2px;}
+.free-dot{color:#22c55e;}.busy-dot{color:#ef4444;}
+
+.time-row{display:flex;gap:6px;}
+.time-row .form-inp{flex:1;}
+
+.form-actions{display:flex;gap:8px;margin-top:12px;padding:0 0px;}
+.btn-cancel-form{
+  flex:1;padding:9px;border-radius:6px;font-size:13px;font-weight:600;
+  background:#374151;color:#d1d5db;border:none;cursor:pointer;transition:background .15s;
+}
+.btn-cancel-form:hover{background:#4b5563;}
+.btn-confirm-form{
+  flex:1;padding:9px;border-radius:6px;font-size:13px;font-weight:600;
+  background:#4b5563;color:#9ca3af;border:none;cursor:pointer;transition:all .15s;
+}
+.btn-confirm-form.ready{background:#3b5bdb;color:#fff;}
+.btn-confirm-form.ready:hover{background:#4c6ef5;}
+
+/* ─── MAIN CAL ─── */
+.cal-main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#fff;}
+
+.cal-toolbar{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;gap:8px;
+  padding:10px 16px;
+  border-bottom:1px solid #e5e7eb;
+  background:#fff;flex-shrink:0;
+}
+.tb-left{display:flex;align-items:center;gap:6px;}
+.tb-center{display:flex;justify-content:center;align-items:center;}
+.tb-right{display:flex;align-items:center;gap:8px;justify-content:flex-end;}
+.tb-nav{background:#fff;border:1px solid #e5e7eb;color:#374151;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:14px;transition:all .15s;}
+.tb-nav:hover{background:#f3f4f6;}
+.tb-today{background:#fff;border:1px solid #e5e7eb;color:#374151;border-radius:6px;padding:5px 14px;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;}
+.tb-today:hover{background:#f3f4f6;}
+.view-sw{display:flex;gap:0;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;}
+.vbtn{padding:5px 14px;font-size:13px;cursor:pointer;border:none;background:#fff;color:#6b7280;font-weight:500;border-right:1px solid #e5e7eb;transition:background-color 0.2s;}
+.vbtn:last-child{border-right:none;}
+.vbtn.act{background:#ef4444;color:#fff;}
+.tb-search{display:flex;align-items:center;gap:6px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:5px 10px;}
+.tb-search input{border:none;background:none;outline:none;font-size:13px;color:#374151;width:140px;}
+.tz-lbl{font-size:11px;color:#9ca3af;white-space:nowrap;}
+
+/* Tối ưu hiệu ứng và kích thước lịch */
+.week-wrap {
+  flex:1;
+  overflow-y:auto;
+  overflow-x:auto;
+  display:flex; /* Giúp các thẻ con (như grid tháng/năm) co giãn 100% height */
+  flex-direction:column;
+}
+
+/* Animation khi đổi view */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.week-grid{display:grid;grid-template-columns:64px repeat(7,1fr);width:100%;border-left:1px solid #e5e7eb;animation: fadeIn 0.3s ease;}
+.gutter-hdr{background:#fff;border-bottom:2px solid #e5e7eb;border-right:1px solid #e5e7eb;position:sticky;top:0;z-index:10;}
+.day-hdr{
+  background:#fff;text-align:center;padding:10px 4px 8px;
+  border-bottom:2px solid #e5e7eb;border-right:1px solid #e5e7eb;
+  position:sticky;top:0;z-index:10;
+}
+.day-hdr .dow{font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:.04em;font-weight:600;}
+.day-hdr .dom{font-size:26px;font-weight:700;color:#111827;margin-top:2px;line-height:1;}
+.day-hdr.today-col .dom{
+  background:#ef4444;color:#fff;border-radius:50%;
+  width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;
+  font-size:20px;
+}
+
+.t-gut{
+  padding:0 10px;font-size:11px;color:#9ca3af;
+  text-align:right;height:60px;
+  display:flex;align-items:flex-start;padding-top:6px;
+  border-bottom:1px solid #f0f0f0;border-right:1px solid #e5e7eb;
+  background:#fff;
+}
+.d-cell{
+  height:60px;border-right:1px solid #e5e7eb;border-bottom:1px solid #f0f0f0;
+  position:relative;cursor:pointer;transition:background .1s;
+}
+.d-cell:hover{background:#f9fafb;}
+.d-cell.today-shade{background:#fef9f9;}
+
+.ev{
+  position:absolute;left:3px;right:3px;
+  border-radius:4px;padding:4px 7px;
+  font-size:11px;cursor:pointer;z-index:2;
+  overflow:hidden;border:none;
+  transition:filter .12s,transform .1s;
+}
+.ev:hover{filter:brightness(1.05);transform:scale(1.01);}
+.ev-time{font-size:10px;font-weight:600;margin-bottom:1px;display:flex;align-items:center;gap:3px;}
+.ev-time .dot-icon{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);display:inline-block;}
+.ev-title{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+.ev-blue{background:#e0f2fe;color:#0369a1;border-left:3px solid #38bdf8;}
+.ev-purple{background:#ede9fe;color:#6d28d9;border-left:3px solid #8b5cf6;}
+.ev-red{background:#fee2e2;color:#dc2626;border-left:3px solid #ef4444;}
+.ev-orange{background:#fff7ed;color:#c2410c;border-left:3px solid #f97316;}
+.ev-green{background:#dcfce7;color:#15803d;border-left:3px solid #22c55e;}
+.ev-conflict{background:#fee2e2;color:#dc2626;border:1px dashed #ef4444;}
+
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 18px;border-radius:10px;
+  font-size:13px;font-weight:600;
+  box-shadow:0 8px 32px rgba(0,0,0,.18);
+  animation:toastIn .3s ease;min-width:220px;pointer-events:auto;
+}
+.toast.success{background:#22c55e;color:#fff;}
+.toast.error{background:#ef4444;color:#fff;}
+.toast.warn{background:#f59e0b;color:#fff;}
+.toast-icon{font-size:18px;width:28px;height:28px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;}
+@keyframes toastIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+/* DAY view */
+.view-day .week-grid{grid-template-columns:64px 1fr;}
+
+/* MONTH view */
+.month-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  grid-auto-rows: 1fr; /* Tự động chia đều chiều cao các dòng */
+  width:100%;
+  flex: 1; /* Choán đầy khoảng trống theo chiều dọc */
+  animation: fadeIn 0.3s ease;
+}
+.month-day-hdr{
+  text-align:center;padding:8px 4px;font-size:11px;font-weight:700;
+  color:#9ca3af;text-transform:uppercase;border-bottom:2px solid #e5e7eb;
+  border-right:1px solid #e5e7eb;background:#fff;
+  height: max-content;
+}
+.month-cell{
+  min-height:110px;border-right:1px solid #e5e7eb;border-bottom:1px solid #f0f0f0;
+  padding:4px;position:relative;cursor:pointer;vertical-align:top;
+  transition:background .1s;
+}
+.month-cell:hover{background:#f9fafb;}
+.month-cell.today-month{background:#fef9f9;}
+.month-cell.other-month-cell{background:#fafafa;}
+.month-num{font-size:13px;font-weight:600;color:#374151;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin-bottom:2px;}
+.month-num.today-num{background:#ef4444;color:#fff;}
+.month-ev{font-size:10px;font-weight:600;border-radius:3px;padding:2px 5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+
+/* YEAR view */
+.year-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:16px;width:100%;
+  animation: fadeIn 0.3s ease;
+}
+.year-month-block{border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;display: flex; flex-direction: column;}
+.year-month-title{background:#f9fafb;padding:8px;text-align:center;font-size:12px;font-weight:700;color:#374151;border-bottom:1px solid #e5e7eb;}
+.year-mini-grid{display:grid;grid-template-columns:repeat(7,1fr);padding:4px;flex: 1;}
+.year-dlbl{text-align:center;font-size:9px;color:#9ca3af;font-weight:600;padding:2px 0;}
+.year-day{text-align:center;font-size:10px;padding:3px 0;border-radius:50%;cursor:pointer;color:#374151;}
+.year-day:hover{background:#f3f4f6;}
+.year-day.y-today{background:#ef4444;color:#fff;font-weight:700;}
+.year-day.y-has-ev{color:#3b5bdb;font-weight:700;}
+.year-day.y-other{color:#d1d5db;}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-ov.open{display:flex;}
+.modal-box{background:#fff;border-radius:12px;padding:24px;width:380px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.modal-box h3{font-size:16px;font-weight:700;color:#111827;margin-bottom:4px;}
+.modal-sub{font-size:13px;color:#6b7280;margin-bottom:14px;}
+.modal-detail{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;}
+.modal-detail .mrow{display:flex;gap:8px;margin-bottom:6px;}
+.modal-detail .mrow:last-child{margin-bottom:0;}
+.mrow-lbl{color:#9ca3af;width:90px;flex-shrink:0;}
+.modal-acts{display:flex;gap:8px;}
+.mbtn{padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;flex:1;}
+.mbtn-close{background:#f3f4f6;color:#374151;}
+.mbtn-edit{background:#3b5bdb;color:#fff;}
+.mbtn-del{background:#fee2e2;color:#dc2626;}
+
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#e5e7eb;border-radius:3px;}
+.sidebar ::-webkit-scrollbar-thumb{background:#3d4470;}
+</style>
+</head>
+<body>
+<script src="/auth-guard.js"></script>
+
+<nav class="topbar">
+  <div class="logo-wrap">
+    <div class="logo-box">TX</div>
+    <div class="logo-name">Technology X</div>
+  </div>
+  <div class="nav-links">
+    <a>Trang Chủ</a>
+    <a>Nhân sự</a>
+    <a>Dự án</a>
+    <a class="active">Đặt phòng họp</a>
+    <a class="nav-link-admin" href="/quan-ly-phong-hop.html">Quản Lý</a>
+  </div>
+  <div class="nav-right">
+    <div class="search-nav">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input placeholder="Tìm kiếm">
+    </div>
+    <span class="user-info">An Nhiệt · User</span>
+    <div class="avatar">AN</div>
+  </div>
+</nav>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="win-dots">
+      <div class="dot red"></div>
+      <div class="dot yellow"></div>
+      <div class="dot green"></div>
+      <button class="dot-plus">+</button>
+    </div>
+
+    <div class="mini-cal">
+      <div class="mini-cal-hdr">
+        <div class="mini-cal-title" id="miniTitle">Tháng 2 <span>2026</span></div>
+        <div class="mini-nav-wrap">
+          <button class="mini-nav" onclick="shiftMonth(-1)">‹</button>
+          <button class="mini-nav" onclick="shiftMonth(1)">›</button>
+        </div>
+      </div>
+      <div class="cal-grid7" id="miniGrid"></div>
+    </div>
+
+    <div class="today-info">
+      <span class="today-label-txt">Hôm nay</span>
+      <span class="today-date-txt" id="todayTxt"></span>
+    </div>
+
+    <div class="booking-form">
+      <div class="form-badge">Thông tin cuộc họp</div>
+
+      <div class="form-section-label">Tiêu đề cuộc họp</div>
+      <input class="form-inp" id="fTitle" placeholder="Nhập tên cuộc họp...">
+
+      <div class="form-section-label">Thành viên</div>
+      <input class="form-inp" id="fMembers" placeholder="Tìm tên hoặc email nhân viên...">
+
+      <div class="form-section-label">Ngày họp</div>
+      <input class="form-inp" id="fDate" type="date">
+
+      <div class="form-section-label">Thời gian</div>
+      <div class="time-row">
+        <input class="form-inp" id="fStart" type="time" value="09:00">
+        <input class="form-inp" id="fEnd"   type="time" value="10:00">
+      </div>
+
+      <div class="form-section-label">Phòng họp</div>
+      <div class="room-select-wrap">
+        <div class="room-select-btn" id="roomSelectBtn">
+          <span id="roomSelectLabel" style="color:#4b5563">Chọn phòng họp...</span>
+          <span>▲</span>
+        </div>
+      </div>
+      <div class="room-list" id="roomList"></div>
+
+      <div class="form-actions">
+        <button class="btn-cancel-form" onclick="resetForm()">Huỷ bỏ</button>
+        <button class="btn-confirm-form" id="btnConfirm" onclick="confirmBooking()">Xác nhận</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="cal-main">
+    <div class="cal-toolbar">
+      <div class="tb-left">
+        <button class="tb-nav" onclick="shiftWeek(-1)">‹</button>
+        <button class="tb-today" onclick="goToday()">Hôm nay</button>
+        <button class="tb-nav" onclick="shiftWeek(1)">›</button>
+      </div>
+      <div class="tb-center">
+        <div class="view-sw">
+          <button class="vbtn" onclick="setView('day',this)">Ngày</button>
+          <button class="vbtn act" onclick="setView('week',this)">Tuần</button>
+          <button class="vbtn" onclick="setView('month',this)">Tháng</button>
+          <button class="vbtn" onclick="setView('year',this)">Năm</button>
+        </div>
+      </div>
+      <div class="tb-right">
+        <div class="tb-search">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="calSearch" placeholder="Tìm kiếm..." oninput="handleSearch(this.value)">
+        </div>
+        <span class="tz-lbl">EST GMT-5</span>
+      </div>
+    </div>
+
+    <div class="week-wrap" id="mainWrap">
+      <div class="week-grid" id="weekGrid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-ov" id="modalOv">
+  <div class="modal-box">
+    <h3 id="mTitle"></h3>
+    <div class="modal-sub" id="mSub"></div>
+    <div class="modal-detail" id="mDetail"></div>
+    <div class="modal-acts" id="mActs"></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+// ═══ DATA ═══
+const ME = (window.CURRENT_USER && window.CURRENT_USER.fullName) || 'Khách';
+const IS_ADMIN = window.CURRENT_USER && window.CURRENT_USER.role === 'admin';
+const MONTHS_VI = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+const DOW_VI = ['T2','T3','T4','T5','T6','T7','CN'];
+
+let ROOMS = [];
+
+const EV_COLORS = {P101:'ev-blue', P102:'ev-purple', P103:'ev-green', P203:'ev-orange'};
+
+const today = new Date(); today.setHours(0,0,0,0);
+let miniBase = new Date(today.getFullYear(), today.getMonth(), 1);
+let weekStart = getWeekStart(today);
+let selDate = new Date(today);
+let selRoom = null;
+let editId = null;
+let nid = 20;
+
+let bookings = [];
+
+async function loadData(){
+  try {
+    const [roomsRes, bookingsRes] = await Promise.all([
+      fetch('/api/rooms'),
+      fetch('/api/bookings')
+    ]);
+    if(!roomsRes.ok || !bookingsRes.ok) throw new Error('load failed');
+    ROOMS = await roomsRes.json();
+    bookings = await bookingsRes.json();
+    nid = bookings.length ? Math.max(...bookings.map(b => b.id)) + 1 : 20;
+    renderMini();
+    renderAll();
+    renderRooms();
+  } catch (err) {
+    toast('Không thể tải dữ liệu từ máy chủ', 'error');
+  }
+}
+
+// ═══ UTILS ═══
+function fd(d){return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());}
+function isSlotPast(ds,h){
+  const now=new Date();
+  const todayStr=fd(now);
+  if(ds<todayStr) return true;
+  if(ds===todayStr) return h<now.getHours();
+  return false;
+}
+function p2(n){return String(n).padStart(2,'0');}
+function addD(d,n){let r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function getWeekStart(d){let r=new Date(d);let day=r.getDay();r.setDate(r.getDate()-((day===0)?6:day-1));return r;}
+function t2m(t){let[h,m]=t.split(':').map(Number);return h*60+m;}
+function fdDisplay(ds){let p=ds.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+
+// ═══ TOAST ═══
+function toast(msg, type='success'){
+  const w=document.getElementById('toastWrap');
+  const el=document.createElement('div');
+  el.className='toast '+type;
+  const icon=type==='success'?'✓':type==='error'?'✗':'⚠';
+  el.innerHTML=`<div class="toast-icon">${icon}</div><div>${msg}</div>`;
+  w.appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(()=>el.remove(),300);},3000);
+}
+
+// ═══ MINI CAL ═══
+function renderMini(){
+  const y=miniBase.getFullYear(), m=miniBase.getMonth();
+  const tEl=document.getElementById('miniTitle');
+  tEl.innerHTML=MONTHS_VI[m]+' <span>'+y+'</span>';
+
+  const g=document.getElementById('miniGrid'); g.innerHTML='';
+  DOW_VI.forEach(d=>{const e=document.createElement('div');e.className='dlabel';e.textContent=d;g.appendChild(e);});
+
+  let first=new Date(y,m,1).getDay(); first=(first===0)?6:first-1;
+  const dim=new Date(y,m+1,0).getDate();
+  const prev=new Date(y,m,0).getDate();
+
+  for(let i=0;i<first;i++){const e=dc('div','cday other');e.textContent=prev-first+1+i;g.appendChild(e);}
+  for(let d=1;d<=dim;d++){
+    const date=new Date(y,m,d);
+    const e=dc('div','cday');
+    e.textContent=d;
+    if(fd(date)===fd(today)) e.classList.add('today');
+    if(fd(date)===fd(selDate)) e.classList.add('selected');
+    const evs=bookings.filter(b=>b.date===fd(date));
+    if(evs.length>0) e.classList.add('has-ev');
+    if(evs.length>1) e.classList.add('has-ev2');
+    if(evs.length>2) e.classList.add('has-ev3');
+    e.onclick=()=>{selDate=date;weekStart=getWeekStart(date);document.getElementById('fDate').value=fd(date);renderMini();renderAll();renderRooms();};
+    g.appendChild(e);
+  }
+}
+function shiftMonth(n){miniBase.setMonth(miniBase.getMonth()+n);renderMini();}
+function dc(tag,cls){const e=document.createElement(tag);e.className=cls;return e;}
+
+// ═══ WEEK GRID ═══
+const HOURS=[7,8,9,10,11,12,13,14,15,16,17];
+
+function renderWeek(){
+  const wrap=document.getElementById('mainWrap');
+  wrap.innerHTML='<div class="week-grid" id="weekGrid"></div>';
+  const g=document.getElementById('weekGrid');
+  g.style.gridTemplateColumns='64px repeat(7,1fr)';
+
+  const gh=dc('div','gutter-hdr'); g.appendChild(gh);
+  for(let d=0;d<7;d++){
+    const date=addD(weekStart,d);
+    const hdr=dc('div','day-hdr');
+    if(fd(date)===fd(today)) hdr.classList.add('today-col');
+    hdr.innerHTML='<div class="dow">'+DOW_VI[d]+'</div><div class="dom">'+date.getDate()+'</div>';
+    g.appendChild(hdr);
+  }
+
+  HOURS.forEach(h=>{
+    const gut=dc('div','t-gut');
+    gut.textContent=fmtHour(h);
+    g.appendChild(gut);
+
+    for(let d=0;d<7;d++){
+      const date=addD(weekStart,d);
+      const ds=fd(date);
+      const cell=dc('div','d-cell');
+      cell.onclick=(e)=>{
+        if(e.target!==cell) return;
+        if(isSlotPast(ds,h)){toast('Không thể chọn thời gian trong quá khứ','error');return;}
+        selDate=date;
+        document.getElementById('fDate').value=ds;
+        document.getElementById('fStart').value=p2(h)+':00';
+        document.getElementById('fEnd').value=p2(h+1)+':00';
+        renderMini();
+        renderRooms();
+      };
+      if(fd(date)===fd(today)) cell.classList.add('today-shade');
+      g.appendChild(cell);
+
+      const visibleBookings = searchKw
+        ? bookings.filter(b=>b.title.toLowerCase().includes(searchKw)||b.members.toLowerCase().includes(searchKw)||(b.roomName||b.room).toLowerCase().includes(searchKw)||b.owner.toLowerCase().includes(searchKw))
+        : bookings;
+      visibleBookings.filter(b=>b.date===ds && parseInt(b.start.split(':')[0])===h).forEach(b=>{
+        const sm=parseInt(b.start.split(':')[1]);
+        const eh=parseInt(b.end.split(':')[0]), em=parseInt(b.end.split(':')[1]);
+        const dur=(eh-h)*60+(em-sm);
+        const ev=dc('div','ev '+(EV_COLORS[b.room]||'ev-blue'));
+        ev.style.top=(sm/60*56)+'px';
+        ev.style.height=Math.max((dur/60*56)-3,22)+'px';
+        const sh=parseInt(b.start.split(':')[0]);
+        const ampm=sh<12?'AM':'PM';
+        ev.innerHTML='<div class="ev-time"><span class="dot-icon"></span>'+b.start+' '+ampm+'</div><div class="ev-title">'+b.title+'('+b.owner+')-'+(b.roomName||b.room)+'</div>';
+        ev.onclick=(e)=>{e.stopPropagation();openModal(b);};
+        cell.appendChild(ev);
+      });
+    }
+  });
+}
+function fmtHour(h){
+  if(h<12) return h+' AM';
+  if(h===12) return '12 PM';
+  return (h-12)+' PM';
+}
+function shiftWeek(n){
+  if(curView==='day'){ selDate=addD(selDate,n); weekStart=getWeekStart(selDate); }
+  else if(curView==='week'){ weekStart=addD(weekStart,n*7); selDate=new Date(weekStart); }
+  else if(curView==='month'){ miniBase.setMonth(miniBase.getMonth()+n); selDate=new Date(miniBase.getFullYear(),miniBase.getMonth(),1); }
+  else if(curView==='year'){ miniBase.setFullYear(miniBase.getFullYear()+n); }
+  renderAll();
+}
+function goToday(){weekStart=getWeekStart(today);selDate=new Date(today);miniBase=new Date(today.getFullYear(),today.getMonth(),1);renderAll();}
+function renderAll(){renderMini();if(curView==='day')renderDay();else if(curView==='week')renderWeek();else if(curView==='month')renderMonth();else renderYear();}
+
+// ═══ ROOM LIST ═══
+function renderRooms(){
+  const ds=document.getElementById('fDate').value;
+  const s=document.getElementById('fStart').value;
+  const e=document.getElementById('fEnd').value;
+  const list=document.getElementById('roomList'); list.innerHTML='';
+
+  const now=new Date();
+  const todayStr=fd(now);
+  const nowMin=now.getHours()*60+now.getMinutes();
+  const isPast = ds && (ds<todayStr || (ds===todayStr && t2m(s)<nowMin));
+
+  ROOMS.forEach(r=>{
+    const conflict=isPast || bookings.find(b=>b.room===r.id&&b.date===ds&&b.id!==editId&&t2m(b.start)<t2m(e)&&t2m(b.end)>t2m(s));
+    const item=dc('div','room-item'+(conflict?' busy':'')+(selRoom===r.id&&!conflict?' selected-room':''));
+    item.innerHTML='<div class="room-item-name">'+r.name+'</div><div class="room-item-detail">'+r.detail+'</div><div class="room-status-dot '+(conflict?'busy-dot':'free-dot')+'">'+(isPast?'● Đã qua thời gian':conflict?'● Đã được đặt':'● Còn trống')+'</div>';
+    if(!conflict){
+      item.onclick=()=>{
+        selRoom=r.id;
+        document.getElementById('roomSelectLabel').textContent=r.name;
+        document.getElementById('roomSelectLabel').style.color='#e2e8f0';
+        renderRooms();
+        updateConfirmBtn();
+      };
+    } else {
+      item.onclick=()=>toast(isPast?'Không thể đặt phòng cho thời gian trong quá khứ':'Phòng '+r.name+' đã được đặt trong khung giờ này!','error');
+    }
+    list.appendChild(item);
+  });
+  updateConfirmBtn();
+}
+
+function updateConfirmBtn(){
+  const btn=document.getElementById('btnConfirm');
+  const ok=document.getElementById('fTitle').value.trim()&&document.getElementById('fMembers').value.trim()&&selRoom;
+  btn.className='btn-confirm-form'+(ok?' ready':'');
+}
+
+// ═══ BOOKING ═══
+async function confirmBooking(){
+  const title=document.getElementById('fTitle').value.trim();
+  const members=document.getElementById('fMembers').value.trim();
+  const ds=document.getElementById('fDate').value;
+  const s=document.getElementById('fStart').value;
+  const e=document.getElementById('fEnd').value;
+
+  if(!title){toast('Vui lòng nhập tiêu đề cuộc họp','error');return;}
+  if(!members){toast('Vui lòng nhập thành viên','error');return;}
+  if(!ds){toast('Vui lòng chọn ngày họp','error');return;}
+  if(t2m(s)>=t2m(e)){toast('Giờ kết thúc phải sau giờ bắt đầu','error');return;}
+  if(!selRoom){toast('Vui lòng chọn phòng họp','error');return;}
+
+  const now=new Date();
+  const todayStr=fd(now);
+  if(ds<todayStr){toast('Không thể đặt phòng cho ngày trong quá khứ','error');return;}
+  if(ds===todayStr){
+    const nowMin=now.getHours()*60+now.getMinutes();
+    if(t2m(s)<nowMin){toast('Không thể đặt phòng cho giờ đã qua trong ngày hôm nay','error');return;}
+  }
+
+  const conflict=bookings.find(b=>b.room===selRoom&&b.date===ds&&b.id!==editId&&t2m(b.start)<t2m(e)&&t2m(b.end)>t2m(s));
+  if(conflict){toast('Phòng đã bị đặt trong khung giờ này!','error');return;}
+
+  try {
+    const payload={title,members,room:selRoom,date:ds,start:s,end:e};
+    const wasEditing=Boolean(editId);
+    const method=editId ? 'PUT' : 'POST';
+    const url=editId ? `/api/bookings/${editId}` : '/api/bookings';
+    const res=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!res.ok){
+      const data=await res.json().catch(()=>({}));
+      throw new Error(data.error||'save failed');
+    }
+    editId=null;
+    resetForm();
+    await loadData();
+    toast(wasEditing ? 'Cập nhật lịch họp thành công ✓' : 'Đặt phòng '+s+' thành công ✓');
+  } catch (err) {
+    toast(err.message || 'Không thể lưu lịch họp','error');
+  }
+}
+
+function resetForm(){
+  document.getElementById('fTitle').value='';
+  document.getElementById('fMembers').value='';
+  document.getElementById('fDate').value=fd(today);
+  document.getElementById('fStart').value='09:00';
+  document.getElementById('fEnd').value='10:00';
+  document.getElementById('roomSelectLabel').textContent='Chọn phòng họp...';
+  document.getElementById('roomSelectLabel').style.color='#4b5563';
+  selRoom=null; editId=null;
+  renderRooms();updateConfirmBtn();
+}
+
+// ═══ MODAL ═══
+function openModal(b){
+  document.getElementById('mTitle').textContent=b.title;
+  document.getElementById('mSub').textContent=(b.roomName||b.room)+' · '+fdDisplay(b.date);
+  document.getElementById('mDetail').innerHTML=
+    '<div class="mrow"><span class="mrow-lbl">⏰ Thời gian:</span>'+b.start+' – '+b.end+'</div>'+
+    '<div class="mrow"><span class="mrow-lbl">📍 Phòng:</span>'+(b.roomName||b.room)+'</div>'+
+    '<div class="mrow"><span class="mrow-lbl">👥 Thành viên:</span>'+b.members+'</div>'+
+    '<div class="mrow"><span class="mrow-lbl">👤 Người đặt:</span>'+b.owner+'</div>';
+  const acts=document.getElementById('mActs'); acts.innerHTML='';
+  const close=dc('button','mbtn mbtn-close');close.textContent='Đóng';close.onclick=closeModal;acts.appendChild(close);
+  if(b.owner===ME || IS_ADMIN){
+    const edit=dc('button','mbtn mbtn-edit');edit.textContent='Chỉnh sửa';
+    edit.onclick=()=>{
+      closeModal();editId=b.id;
+      document.getElementById('fTitle').value=b.title;
+      document.getElementById('fMembers').value=b.members;
+      document.getElementById('fDate').value=b.date;
+      document.getElementById('fStart').value=b.start;
+      document.getElementById('fEnd').value=b.end;
+      selRoom=b.room;
+      document.getElementById('roomSelectLabel').textContent=ROOMS.find(r=>r.id===b.room)?.name||b.room;
+      document.getElementById('roomSelectLabel').style.color='#e2e8f0';
+      renderRooms();updateConfirmBtn();
+      toast('Đang chỉnh sửa: '+b.title,'warn');
+    };acts.appendChild(edit);
+    const del=dc('button','mbtn mbtn-del');del.textContent='Xoá lịch';
+    del.onclick=async()=>{
+      try {
+        const res=await fetch(`/api/bookings/${b.id}`,{method:'DELETE'});
+        if(!res.ok) throw new Error('delete failed');
+        closeModal();
+        await loadData();
+        toast('Đã xoá: '+b.title,'warn');
+      } catch (err) {
+        toast('Không thể xoá lịch họp','error');
+      }
+    };
+    acts.appendChild(del);
+  }
+  document.getElementById('modalOv').classList.add('open');
+}
+function closeModal(){document.getElementById('modalOv').classList.remove('open');}
+document.getElementById('modalOv').onclick=function(e){if(e.target===this)closeModal();};
+
+['fTitle','fMembers'].forEach(id=>document.getElementById(id).addEventListener('input',updateConfirmBtn));
+['fDate','fStart','fEnd'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{renderRooms();}));
+
+// ═══ VIEW SWITCHING ═══
+let curView = 'week';
+
+function setView(v, btn){
+  curView = v;
+  document.querySelectorAll('.vbtn').forEach(b=>b.classList.remove('act'));
+  btn.classList.add('act');
+  renderAll(); // Sẽ gọi hàm vẽ UI tương ứng dựa vào curView và render thẳng ra #mainWrap
+}
+
+// DAY VIEW
+function renderDay(){
+  const wrap=document.getElementById('mainWrap');
+  const g=document.getElementById('weekGrid');
+  wrap.className='week-wrap view-day'; // Thay đổi class để CSS nhận diện hiển thị ngày
+  g.style.gridTemplateColumns='64px 1fr';
+  g.innerHTML='';
+  const ds=fd(selDate);
+  const gh=dc('div','gutter-hdr'); g.appendChild(gh);
+  const hdr=dc('div','day-hdr');
+  if(fd(selDate)===fd(today)) hdr.classList.add('today-col');
+  const d=selDate.getDay(); const dvi=['CN','T2','T3','T4','T5','T6','T7'];
+  hdr.innerHTML='<div class="dow">'+dvi[d]+'</div><div class="dom">'+selDate.getDate()+'</div>';
+  g.appendChild(hdr);
+  HOURS.forEach(h=>{
+    const gut=dc('div','t-gut'); gut.textContent=fmtHour(h); g.appendChild(gut);
+    const cell=dc('div','d-cell');
+    cell.style.gridColumn='2';
+    if(fd(selDate)===fd(today)) cell.classList.add('today-shade');
+    cell.onclick=(e)=>{
+      if(e.target!==cell) return;
+      if(isSlotPast(ds,h)){toast('Không thể chọn thời gian trong quá khứ','error');return;}
+      document.getElementById('fDate').value=ds;
+      document.getElementById('fStart').value=p2(h)+':00';
+      document.getElementById('fEnd').value=p2(h+1)+':00';
+      renderRooms();
+    };
+    g.appendChild(cell);
+    const vis=searchKw?bookings.filter(b=>b.title.toLowerCase().includes(searchKw)||b.members.toLowerCase().includes(searchKw)||(b.roomName||b.room).toLowerCase().includes(searchKw)||b.owner.toLowerCase().includes(searchKw)):bookings;
+    vis.filter(b=>b.date===ds&&parseInt(b.start.split(':')[0])===h).forEach(b=>{
+      const sm=parseInt(b.start.split(':')[1]),eh=parseInt(b.end.split(':')[0]),em=parseInt(b.end.split(':')[1]);
+      const dur=(eh-h)*60+(em-sm);
+      const ev=dc('div','ev '+(EV_COLORS[b.room]||'ev-blue'));
+      ev.style.top=(sm/60*60)+'px'; ev.style.height=Math.max((dur/60*60)-3,22)+'px';
+      const ampm=parseInt(b.start)<12?'AM':'PM';
+      ev.innerHTML='<div class="ev-time"><span class="dot-icon"></span>'+b.start+' '+ampm+'</div><div class="ev-title">'+b.title+' - '+(b.roomName||b.room)+'</div>';
+      ev.onclick=(e)=>{e.stopPropagation();openModal(b);};
+      cell.appendChild(ev);
+    });
+  });
+}
+
+// MONTH VIEW
+function renderMonth(){
+  const wrap=document.getElementById('mainWrap');
+  wrap.innerHTML='';
+  wrap.className='week-wrap';
+  const y=miniBase.getFullYear(),m=miniBase.getMonth();
+  const mGrid=document.createElement('div'); mGrid.className='month-grid'; mGrid.id='weekGrid';
+  const dayNames=['T2','T3','T4','T5','T6','T7','CN'];
+  
+  // Render headers
+  dayNames.forEach(d=>{
+    const h=dc('div','month-day-hdr');h.textContent=d;
+    mGrid.appendChild(h);
+  });
+  
+  let first=new Date(y,m,1).getDay(); first=(first===0)?6:first-1;
+  const dim=new Date(y,m+1,0).getDate();
+  const prevDim=new Date(y,m,0).getDate();
+  const total=Math.ceil((first+dim)/7)*7;
+  
+  for(let i=0;i<total;i++){
+    let day,month,year,isOther=false;
+    if(i<first){day=prevDim-first+1+i;month=m-1;year=y;isOther=true;}
+    else if(i>=first+dim){day=i-first-dim+1;month=m+1;year=y;isOther=true;}
+    else{day=i-first+1;month=m;year=y;}
+    if(month<0){month=11;year--;}if(month>11){month=0;year++;}
+    
+    const date=new Date(year,month,day);
+    const ds2=fd(date);
+    const cell=dc('div','month-cell'+(isOther?' other-month-cell':'')+(fd(date)===fd(today)?' today-month':''));
+    const num=dc('div','month-num'+(fd(date)===fd(today)?' today-num':''));
+    num.textContent=day; cell.appendChild(num);
+    
+    const vis=searchKw?bookings.filter(b=>b.title.toLowerCase().includes(searchKw)||b.members.toLowerCase().includes(searchKw)||(b.roomName||b.room).toLowerCase().includes(searchKw)||b.owner.toLowerCase().includes(searchKw)):bookings;
+    vis.filter(b=>b.date===ds2).forEach(b=>{
+      const ev=dc('div','month-ev '+(EV_COLORS[b.room]||'ev-blue'));
+      ev.textContent=b.start+' '+b.title;
+      ev.onclick=(e)=>{e.stopPropagation();openModal(b);}; cell.appendChild(ev);
+    });
+    
+    cell.onclick=(e)=>{
+      if(e.target===cell||e.target===num){
+        selDate=date;weekStart=getWeekStart(date);
+        document.getElementById('fDate').value=ds2;
+        renderMini();renderRooms();
+      }
+    };
+    mGrid.appendChild(cell);
+  }
+  wrap.appendChild(mGrid);
+}
+
+// YEAR VIEW
+function renderYear(){
+  const wrap=document.getElementById('mainWrap');
+  wrap.innerHTML='';
+  wrap.className='week-wrap';
+  const y=miniBase.getFullYear();
+  const yGrid=document.createElement('div'); yGrid.className='year-grid'; yGrid.id='weekGrid';
+  for(let m=0;m<12;m++){
+    const block=dc('div','year-month-block');
+    const title=dc('div','year-month-title'); title.textContent=MONTHS_VI[m]+' '+y; block.appendChild(title);
+    const grid=dc('div','year-mini-grid');
+    ['T2','T3','T4','T5','T6','T7','CN'].forEach(d=>{const l=dc('div','year-dlbl');l.textContent=d;grid.appendChild(l);});
+    let first=new Date(y,m,1).getDay(); first=(first===0)?6:first-1;
+    const dim=new Date(y,m+1,0).getDate();
+    for(let i=0;i<first;i++){const e=dc('div','year-day y-other');e.textContent='';grid.appendChild(e);}
+    for(let d=1;d<=dim;d++){
+      const date=new Date(y,m,d);
+      const e=dc('div','year-day');
+      e.textContent=d;
+      if(fd(date)===fd(today)) e.classList.add('y-today');
+      if(bookings.some(b=>b.date===fd(date))) e.classList.add('y-has-ev');
+      e.onclick=()=>{selDate=date;weekStart=getWeekStart(date);miniBase=new Date(y,m,1);setView('month',document.querySelectorAll('.vbtn')[2]);};
+      grid.appendChild(e);
+    }
+    block.appendChild(grid); yGrid.appendChild(block);
+  }
+  wrap.appendChild(yGrid);
+}
+
+// ═══ SEARCH ═══
+let searchKw = '';
+function handleSearch(val){
+  searchKw = val.trim().toLowerCase();
+  // Đã sửa lại lỗi hiển thị: render toàn bộ các view thay vì chỉ gọi renderWeek()
+  renderAll();
+}
+
+// ═══ INIT ═══
+document.getElementById('todayTxt').textContent=fdDisplay(fd(today));
+document.getElementById('fDate').value=fd(today);
+document.getElementById('fDate').min=fd(today);
+loadData();
+</script>
+</body>
+</html>
