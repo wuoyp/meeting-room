@@ -74,9 +74,14 @@ if (require.main === module) {
 } else {
   // Vẫn cần đảm bảo có tài khoản mặc định khi chạy trên Vercel,
   // nhưng không block việc export app.
-  getPool().then(pool => ensureDefaultAccounts(pool)).catch(err => {
-    console.error('⚠️  Không thể khởi tạo tài khoản admin mặc định:', err.message);
-  });
+  try {
+    const pool = getPool();
+    ensureDefaultAccounts(pool).catch(err => {
+      console.error('⚠️  Không thể khởi tạo tài khoản admin mặc định:', err.message);
+    });
+  } catch (err) {
+    console.error('⚠️  Không thể khởi tạo kết nối database:', err.message);
+  }
 }
 
 module.exports = app;
